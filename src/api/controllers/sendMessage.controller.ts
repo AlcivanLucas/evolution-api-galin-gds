@@ -9,6 +9,7 @@ import {
   SendPollDto,
   SendPtvDto,
   SendReactionDto,
+  SendSoundStickerDto,
   SendStatusDto,
   SendStickerDto,
   SendTemplateDto,
@@ -62,6 +63,18 @@ export class SendMessageController {
       return await this.waMonitor.waInstances[instanceName].mediaSticker(data, file);
     }
     throw new BadRequestException('Owned media must be a url or base64');
+  }
+
+  public async sendSoundSticker({ instanceName }: InstanceDto, data: SendSoundStickerDto) {
+    const isMedia = (value: string) => isURL(value) || isBase64(value);
+    if (!isMedia(data.sticker) || !isMedia(data.audio)) {
+      throw new BadRequestException('sticker and audio must be a url or base64');
+    }
+    const instance = this.waMonitor.waInstances[instanceName];
+    if (typeof instance?.soundStickerMessage !== 'function') {
+      throw new BadRequestException('Sound stickers are only supported on the Baileys integration');
+    }
+    return await instance.soundStickerMessage(data);
   }
 
   public async sendWhatsAppAudio({ instanceName }: InstanceDto, data: SendAudioDto, file?: any) {

@@ -46,6 +46,7 @@ import {
   SendPollDto,
   SendPtvDto,
   SendReactionDto,
+  SendSoundStickerDto,
   SendStatusDto,
   SendStickerDto,
   SendTextDto,
@@ -2155,7 +2156,7 @@ export class BaileysStartupService extends ChannelStartupService {
     // NOTE: NÃO DEVEMOS GERAR O messageId AQUI, SOMENTE SE VIER INFORMADO POR PARAMETRO. A GERAÇÃO ANTERIOR IMPEDE O WZAP DE IDENTIFICAR A SOURCE.
     if (messageId) option.messageId = messageId;
 
-    if (message['viewOnceMessage']) {
+    if (message['viewOnceMessage'] || message['audioStickerMessage']) {
       const m = generateWAMessageFromContent(sender, message, {
         timestamp: new Date(),
         userJid: this.instance.wuid,
@@ -2976,6 +2977,53 @@ export class BaileysStartupService extends ChannelStartupService {
     );
 
     return result;
+  }
+
+  // Sound sticker, as observed from WhatsApp clients (unofficial, Nov/2026):
+  // Message.audioStickerMessage (134, FutureProofMessage) -> stickerMessage -> audioMessage (26).
+  // Needs the WAProto fields added in patches/baileys+7.0.0-rc.9.patch.
+  public async soundStickerMessage(data: SendSoundStickerDto) {
+    const stickerBuffer = data?.notConvertSticker
+      ? await this.loadMediaBuffer(data.sticker)
+      : await this.convertToWebP(data.sticker);
+
+    const audioBuffer =
+      data?.encoding === false ? await this.loadMediaBuffer(data.audio) : await this.processAudio(data.audio);
+
+    const { stickerMessage } = await prepareWAMessageMedia({ sticker: stickerBuffer } as any, {
+      upload: this.client.waUploadToServer,
+    });
+
+    const { audioMessage } = await prepareWAMessageMedia(
+      { audio: audioBuffer, mimetype: 'audio/ogg; codecs=opus', ptt: data?.ptt ?? false } as any,
+      { upload: this.client.waUploadToServer },
+    );
+
+    const message = {
+      audioStickerMessage: {
+        message: {
+          stickerMessage: {
+            ...proto.Message.StickerMessage.toObject(stickerMessage as proto.Message.StickerMessage),
+            isAnimated: this.isAnimatedWebp(stickerBuffer),
+            audioMessage: proto.Message.AudioMessage.toObject(audioMessage as proto.Message.AudioMessage),
+          },
+        },
+      },
+    };
+
+    return await this.sendMessageWithTyping(data.number, message, {
+      delay: data?.delay,
+      presence: 'composing',
+      quoted: data?.quoted,
+    });
+  }
+
+  private async loadMediaBuffer(media: string): Promise<Buffer> {
+    if (isURL(media)) {
+      const response = await axios.get(media, { responseType: 'arraybuffer' });
+      return Buffer.from(response.data);
+    }
+    return Buffer.from(media.replace(/^data:[^;]+;base64,/, ''), 'base64');
   }
 
   public async mediaMessage(data: SendMediaDto, file?: any, isIntegration = false) {

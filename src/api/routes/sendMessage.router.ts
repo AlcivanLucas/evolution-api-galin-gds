@@ -9,6 +9,7 @@ import {
   SendPollDto,
   SendPtvDto,
   SendReactionDto,
+  SendSoundStickerDto,
   SendStatusDto,
   SendStickerDto,
   SendTemplateDto,
@@ -25,6 +26,7 @@ import {
   pollMessageSchema,
   ptvMessageSchema,
   reactionMessageSchema,
+  soundStickerMessageSchema,
   statusMessageSchema,
   stickerMessageSchema,
   templateMessageSchema,
@@ -118,6 +120,16 @@ export class MessageRouter extends RouterBroker {
           schema: stickerMessageSchema,
           ClassRef: SendStickerDto,
           execute: (instance) => sendMessageController.sendSticker(instance, bodyData, req.file as any),
+        });
+
+        return res.status(HttpStatus.CREATED).json(response);
+      })
+      .post(this.routerPath('sendSoundSticker'), ...guards, async (req, res) => {
+        const response = await this.dataValidate<SendSoundStickerDto>({
+          request: req,
+          schema: soundStickerMessageSchema,
+          ClassRef: SendSoundStickerDto,
+          execute: (instance, data) => sendMessageController.sendSoundSticker(instance, data),
         });
 
         return res.status(HttpStatus.CREATED).json(response);
