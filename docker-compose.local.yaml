@@ -1,0 +1,67 @@
+# Local development stack for this fork (sound-sticker bot, see ../PLANO.md).
+# Builds the API from this repository's source, not from the public image.
+#
+#   docker compose -f docker-compose.local.yaml up -d --build
+#   Manager: http://localhost:8080/manager  (API key = AUTHENTICATION_API_KEY in .env)
+
+services:
+  api:
+    container_name: evolution_api_local
+    image: evolution-api-galin-gds:local
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    restart: unless-stopped
+    depends_on:
+      - evolution-redis
+      - evolution-postgres
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - .env
+    dns:
+      # Docker Desktop's DNS proxy is unreliable on this machine; WhatsApp needs DNS at runtime.
+      - 1.1.1.1
+      - 8.8.8.8
+    extra_hosts:
+      # Lets webhooks reach the bot running on the host: http://host.docker.internal:<port>
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks:
+      - evolution-local
+
+  evolution-redis:
+    container_name: evolution_redis_local
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --port 6379 --appendonly yes
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - evolution_redis:/data
+    networks:
+      - evolution-local
+
+  evolution-postgres:
+    container_name: evolution_postgres_local
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+      - POSTGRES_USER=${POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - evolution-local
+
+volumes:
+  evolution_instances:
+  evolution_redis:
+  postgres_data:
+
+networks:
+  evolution-local:
+    name: evolution-local
+    driver: bridge
