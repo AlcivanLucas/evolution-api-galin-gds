@@ -1,3 +1,193 @@
+diff --git a/node_modules/baileys/WAProto/WAProto.proto b/node_modules/baileys/WAProto/WAProto.proto
+index d763174..a3d0b12 100644
+--- a/node_modules/baileys/WAProto/WAProto.proto
++++ b/node_modules/baileys/WAProto/WAProto.proto
+@@ -2150,6 +2150,7 @@ message Message {
+     optional FutureProofMessage questionMessage = 101;
+     optional MessageHistoryNotice messageHistoryNotice = 102;
+     optional FutureProofMessage groupStatusMessageV2 = 103;
++    optional FutureProofMessage audioStickerMessage = 134;
+     optional FutureProofMessage botForwardedMessage = 104;
+     optional StatusQuestionAnswerMessage statusQuestionAnswerMessage = 105;
+     optional FutureProofMessage questionReplyMessage = 106;
+@@ -3500,6 +3501,7 @@ message Message {
+         optional bool isLottie = 21;
+         optional string accessibilityLabel = 22;
+         optional Message.MediaKeyDomain mediaKeyDomain = 23;
++        optional AudioMessage audioMessage = 26;
+     }
+ 
+     message StickerPackMessage {
+diff --git a/node_modules/baileys/WAProto/index.d.ts b/node_modules/baileys/WAProto/index.d.ts
+index 8640580..ae3ca0c 100644
+--- a/node_modules/baileys/WAProto/index.d.ts
++++ b/node_modules/baileys/WAProto/index.d.ts
+@@ -5269,6 +5269,7 @@ export namespace proto {
+         questionMessage?: (proto.Message.IFutureProofMessage|null);
+         messageHistoryNotice?: (proto.Message.IMessageHistoryNotice|null);
+         groupStatusMessageV2?: (proto.Message.IFutureProofMessage|null);
++        audioStickerMessage?: (proto.Message.IFutureProofMessage|null);
+         botForwardedMessage?: (proto.Message.IFutureProofMessage|null);
+         statusQuestionAnswerMessage?: (proto.Message.IStatusQuestionAnswerMessage|null);
+         questionReplyMessage?: (proto.Message.IFutureProofMessage|null);
+@@ -5368,6 +5369,7 @@ export namespace proto {
+         public questionMessage?: (proto.Message.IFutureProofMessage|null);
+         public messageHistoryNotice?: (proto.Message.IMessageHistoryNotice|null);
+         public groupStatusMessageV2?: (proto.Message.IFutureProofMessage|null);
++        public audioStickerMessage?: (proto.Message.IFutureProofMessage|null);
+         public botForwardedMessage?: (proto.Message.IFutureProofMessage|null);
+         public statusQuestionAnswerMessage?: (proto.Message.IStatusQuestionAnswerMessage|null);
+         public questionReplyMessage?: (proto.Message.IFutureProofMessage|null);
+@@ -9008,6 +9010,7 @@ export namespace proto {
+             isLottie?: (boolean|null);
+             accessibilityLabel?: (string|null);
+             mediaKeyDomain?: (proto.Message.MediaKeyDomain|null);
++            audioMessage?: (proto.Message.IAudioMessage|null);
+         }
+ 
+         class StickerMessage implements IStickerMessage {
+@@ -9033,6 +9036,7 @@ export namespace proto {
+             public isLottie?: (boolean|null);
+             public accessibilityLabel?: (string|null);
+             public mediaKeyDomain?: (proto.Message.MediaKeyDomain|null);
++            public audioMessage?: (proto.Message.IAudioMessage|null);
+             public static create(properties?: proto.Message.IStickerMessage): proto.Message.StickerMessage;
+             public static encode(m: proto.Message.IStickerMessage, w?: $protobuf.Writer): $protobuf.Writer;
+             public static decode(r: ($protobuf.Reader|Uint8Array), l?: number): proto.Message.StickerMessage;
+diff --git a/node_modules/baileys/WAProto/index.js b/node_modules/baileys/WAProto/index.js
+index 75dae61..bed9487 100644
+--- a/node_modules/baileys/WAProto/index.js
++++ b/node_modules/baileys/WAProto/index.js
+@@ -35511,6 +35511,7 @@ export const proto = $root.proto = (() => {
+         Message.prototype.questionMessage = null;
+         Message.prototype.messageHistoryNotice = null;
+         Message.prototype.groupStatusMessageV2 = null;
++        Message.prototype.audioStickerMessage = null;
+         Message.prototype.botForwardedMessage = null;
+         Message.prototype.statusQuestionAnswerMessage = null;
+         Message.prototype.questionReplyMessage = null;
+@@ -36039,6 +36040,12 @@ export const proto = $root.proto = (() => {
+             set: $util.oneOfSetter($oneOfFields)
+         });
+ 
++        // Virtual OneOf for proto3 optional field
++        Object.defineProperty(Message.prototype, "_audioStickerMessage", {
++            get: $util.oneOfGetter($oneOfFields = ["audioStickerMessage"]),
++            set: $util.oneOfSetter($oneOfFields)
++        });
++
+         // Virtual OneOf for proto3 optional field
+         Object.defineProperty(Message.prototype, "_botForwardedMessage", {
+             get: $util.oneOfGetter($oneOfFields = ["botForwardedMessage"]),
+@@ -36272,6 +36279,8 @@ export const proto = $root.proto = (() => {
+                 $root.proto.Message.MessageHistoryNotice.encode(m.messageHistoryNotice, w.uint32(818).fork()).ldelim();
+             if (m.groupStatusMessageV2 != null && Object.hasOwnProperty.call(m, "groupStatusMessageV2"))
+                 $root.proto.Message.FutureProofMessage.encode(m.groupStatusMessageV2, w.uint32(826).fork()).ldelim();
++            if (m.audioStickerMessage != null && Object.hasOwnProperty.call(m, "audioStickerMessage"))
++                $root.proto.Message.FutureProofMessage.encode(m.audioStickerMessage, w.uint32(1074).fork()).ldelim();
+             if (m.botForwardedMessage != null && Object.hasOwnProperty.call(m, "botForwardedMessage"))
+                 $root.proto.Message.FutureProofMessage.encode(m.botForwardedMessage, w.uint32(834).fork()).ldelim();
+             if (m.statusQuestionAnswerMessage != null && Object.hasOwnProperty.call(m, "statusQuestionAnswerMessage"))
+@@ -36646,6 +36655,10 @@ export const proto = $root.proto = (() => {
+                         m.groupStatusMessageV2 = $root.proto.Message.FutureProofMessage.decode(r, r.uint32());
+                         break;
+                     }
++                case 134: {
++                        m.audioStickerMessage = $root.proto.Message.FutureProofMessage.decode(r, r.uint32());
++                        break;
++                    }
+                 case 104: {
+                         m.botForwardedMessage = $root.proto.Message.FutureProofMessage.decode(r, r.uint32());
+                         break;
+@@ -37122,6 +37135,11 @@ export const proto = $root.proto = (() => {
+                     throw TypeError(".proto.Message.groupStatusMessageV2: object expected");
+                 m.groupStatusMessageV2 = $root.proto.Message.FutureProofMessage.fromObject(d.groupStatusMessageV2);
+             }
++            if (d.audioStickerMessage != null) {
++                if (typeof d.audioStickerMessage !== "object")
++                    throw TypeError(".proto.Message.audioStickerMessage: object expected");
++                m.audioStickerMessage = $root.proto.Message.FutureProofMessage.fromObject(d.audioStickerMessage);
++            }
+             if (d.botForwardedMessage != null) {
+                 if (typeof d.botForwardedMessage !== "object")
+                     throw TypeError(".proto.Message.botForwardedMessage: object expected");
+@@ -37604,6 +37622,11 @@ export const proto = $root.proto = (() => {
+                 if (o.oneofs)
+                     d._groupStatusMessageV2 = "groupStatusMessageV2";
+             }
++            if (m.audioStickerMessage != null && m.hasOwnProperty("audioStickerMessage")) {
++                d.audioStickerMessage = $root.proto.Message.FutureProofMessage.toObject(m.audioStickerMessage, o);
++                if (o.oneofs)
++                    d._audioStickerMessage = "audioStickerMessage";
++            }
+             if (m.botForwardedMessage != null && m.hasOwnProperty("botForwardedMessage")) {
+                 d.botForwardedMessage = $root.proto.Message.FutureProofMessage.toObject(m.botForwardedMessage, o);
+                 if (o.oneofs)
+@@ -62583,6 +62606,7 @@ export const proto = $root.proto = (() => {
+             StickerMessage.prototype.isLottie = null;
+             StickerMessage.prototype.accessibilityLabel = null;
+             StickerMessage.prototype.mediaKeyDomain = null;
++            StickerMessage.prototype.audioMessage = null;
+ 
+             let $oneOfFields;
+ 
+@@ -62712,6 +62736,12 @@ export const proto = $root.proto = (() => {
+                 set: $util.oneOfSetter($oneOfFields)
+             });
+ 
++            // Virtual OneOf for proto3 optional field
++            Object.defineProperty(StickerMessage.prototype, "_audioMessage", {
++                get: $util.oneOfGetter($oneOfFields = ["audioMessage"]),
++                set: $util.oneOfSetter($oneOfFields)
++            });
++
+             StickerMessage.create = function create(properties) {
+                 return new StickerMessage(properties);
+             };
+@@ -62761,6 +62791,8 @@ export const proto = $root.proto = (() => {
+                     w.uint32(178).string(m.accessibilityLabel);
+                 if (m.mediaKeyDomain != null && Object.hasOwnProperty.call(m, "mediaKeyDomain"))
+                     w.uint32(184).int32(m.mediaKeyDomain);
++                if (m.audioMessage != null && Object.hasOwnProperty.call(m, "audioMessage"))
++                    $root.proto.Message.AudioMessage.encode(m.audioMessage, w.uint32(210).fork()).ldelim();
+                 return w;
+             };
+ 
+@@ -62857,6 +62889,10 @@ export const proto = $root.proto = (() => {
+                             m.mediaKeyDomain = r.int32();
+                             break;
+                         }
++                    case 26: {
++                            m.audioMessage = $root.proto.Message.AudioMessage.decode(r, r.uint32());
++                            break;
++                        }
+                     default:
+                         r.skipType(t & 7);
+                         break;
+@@ -62995,6 +63031,11 @@ export const proto = $root.proto = (() => {
+                     m.mediaKeyDomain = 4;
+                     break;
+                 }
++                if (d.audioMessage != null) {
++                    if (typeof d.audioMessage !== "object")
++                        throw TypeError(".proto.Message.StickerMessage.audioMessage: object expected");
++                    m.audioMessage = $root.proto.Message.AudioMessage.fromObject(d.audioMessage);
++                }
+                 return m;
+             };
+ 
+@@ -63116,6 +63157,11 @@ export const proto = $root.proto = (() => {
+                     if (o.oneofs)
+                         d._mediaKeyDomain = "mediaKeyDomain";
+                 }
++                if (m.audioMessage != null && m.hasOwnProperty("audioMessage")) {
++                    d.audioMessage = $root.proto.Message.AudioMessage.toObject(m.audioMessage, o);
++                    if (o.oneofs)
++                        d._audioMessage = "audioMessage";
++                }
+                 return d;
+             };
+ 
 diff --git a/node_modules/baileys/lib/Socket/messages-recv.js b/node_modules/baileys/lib/Socket/messages-recv.js
 index f2e2e10..b9d82c2 100644
 --- a/node_modules/baileys/lib/Socket/messages-recv.js

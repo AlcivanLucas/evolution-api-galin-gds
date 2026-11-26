@@ -224,6 +224,25 @@ export const stickerMessageSchema: JSONSchema7 = {
   required: ['number'],
 };
 
+export const soundStickerMessageSchema: JSONSchema7 = {
+  $id: v4(),
+  type: 'object',
+  properties: {
+    number: { ...numberDefinition },
+    sticker: { type: 'string', minLength: 1 },
+    audio: { type: 'string', minLength: 1 },
+    ptt: { type: 'boolean', enum: [true, false] },
+    encoding: { type: 'boolean', enum: [true, false] },
+    notConvertSticker: { type: 'boolean', enum: [true, false] },
+    delay: {
+      type: 'integer',
+      description: 'Enter a value in milliseconds',
+    },
+    quoted: { ...quotedOptionsSchema },
+  },
+  required: ['number', 'sticker', 'audio'],
+};
+
 export const locationMessageSchema: JSONSchema7 = {
   $id: v4(),
   type: 'object',

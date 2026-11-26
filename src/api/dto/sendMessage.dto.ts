@@ -91,6 +91,15 @@ export class SendStickerDto extends Metadata {
   sticker: string;
 }
 
+// Sound sticker (Message.audioStickerMessage = 134 -> stickerMessage.audioMessage = 26). Unofficial format.
+export class SendSoundStickerDto extends Metadata {
+  // url or base64. Converted to WebP unless notConvertSticker is true.
+  sticker: string;
+  // url or base64. Converted to Ogg Opus mono 48 kHz unless encoding is false.
+  audio: string;
+  ptt?: boolean;
+}
+
 export class SendAudioDto extends Metadata {
   audio: string;
 }
